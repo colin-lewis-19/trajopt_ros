@@ -14,7 +14,10 @@ TRAJOPT_IGNORE_WARNINGS_PUSH
 #include <string>
 #include <vector>
 #include <cmath>
+#include <tesseract_geometry/mesh_parser.h>
 TRAJOPT_IGNORE_WARNINGS_POP
+
+#include <trajopt_tools/convex_decomposition.h>
 
 using namespace VHACD;
 using namespace std;
@@ -169,9 +172,22 @@ public:
     }
     else
     {
-      logger_.Log("Format not supported!\n");
-      return -1;
+      if (!loadOther(params_.m_fileNameIn, points, triangles, logger_))
+      {
+        return -1;
+      }
     }
+
+    //    tesseract_collision::VHACDConvexDeomposition test;
+    //    tesseract_common::VectorVector3d test_vertices;
+    //    Eigen::VectorXi test_triangles(triangles.size());
+    //    for (std::size_t i = 0; i < points.size(); i+=3)
+    //      test_vertices.push_back(Eigen::Vector3d(points[i], points[i + 1], points[i + 2]));
+
+    //    for (std::size_t i = 0; i < triangles.size(); ++i)
+    //      test_triangles(i) = triangles[i];
+
+    //    auto convex_hulls = test.run(test_vertices, test_triangles);
 
     // run V-HACD
     IVHACD* interfaceVHACD = CreateVHACD();
@@ -356,7 +372,8 @@ protected:
       else if (!strcmp(argv[i], "--maxNumVerticesPerCH"))
       {
         if (++i < argc)
-          params.m_paramsVHACD.m_maxNumVerticesPerCH = static_cast<unsigned>(atoi(argv[i]));
+          ;
+        params.m_paramsVHACD.m_maxNumVerticesPerCH = static_cast<unsigned>(atoi(argv[i]));
       }
       else if (!strcmp(argv[i], "--minVolumePerCH"))
       {
@@ -667,6 +684,42 @@ protected:
       logger.Log("File not found\n");
       return false;
     }
+    return true;
+  }
+
+  bool
+  loadOther(const string& fileName, vector<float>& points, vector<unsigned int>& triangles, IVHACD::IUserLogger& logger)
+  {
+    std::cout << "Loaded using other parser" << std::endl;
+    points.clear();
+    triangles.clear();
+
+    auto meshes = tesseract_geometry::createMeshFromPath<tesseract_geometry::Mesh>(
+        fileName, Eigen::Vector3d(1, 1, 1), true, false);
+    if (meshes.empty())
+      return false;
+
+    auto mesh = meshes[0];
+    std::cout << mesh->getVerticeCount() << std::endl;
+    std::cout << mesh->getTriangleCount() << std::endl;
+
+    points.reserve(mesh->getVerticeCount() * 3);
+    for (const auto& v : *(mesh->getVertices()))
+    {
+      points.push_back(v.x());
+      points.push_back(v.y());
+      points.push_back(v.z());
+    }
+
+    auto t = mesh->getTriangles();
+    triangles.resize(static_cast<std::size_t>(mesh->getTriangleCount() * 3));
+    for (Eigen::Index i = 0; i < mesh->getTriangleCount(); ++i)
+    {
+      triangles[static_cast<std::size_t>(i * 3)] = static_cast<unsigned int>((*t)((i * 4) + 1));
+      triangles[static_cast<std::size_t>((i * 3) + 1)] = static_cast<unsigned int>((*t)((i * 4) + 2));
+      triangles[static_cast<std::size_t>((i * 3) + 2)] = static_cast<unsigned int>((*t)((i * 4) + 3));
+    }
+
     return true;
   }
 

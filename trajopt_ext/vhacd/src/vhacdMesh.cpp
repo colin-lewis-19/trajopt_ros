@@ -27,12 +27,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "vhacd/inc/vhacdMesh.h"
-#include "vhacd/inc/FloatMath.h"
+#include <vhacd/inc/vhacdMesh.h>
+#include <vhacd/inc/FloatMath.h>
 
 #include <trajopt_utils/macros.h>
 TRAJOPT_IGNORE_WARNINGS_PUSH
-#include "vhacd/inc/btConvexHullComputer.h"
+#include <bullet/LinearMath/btConvexHullComputer.h>
 #include <fstream>
 #include <iosfwd>
 #include <iostream>

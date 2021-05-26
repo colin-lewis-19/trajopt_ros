@@ -11,6 +11,8 @@ find_package(console_bridge REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(ros_industrial_cmake_boilerplate REQUIRED)
+find_package(tesseract_geometry REQUIRED)
+find_package(tesseract_collision REQUIRED)
 
 find_package(Bullet REQUIRED CONFIGS BulletConfig-float64.cmake BulletConfig.cmake)
 IF(NOT ${BULLET_DEFINITIONS} MATCHES ".*-DBT_USE_DOUBLE_PRECISION.*")
@@ -37,6 +39,24 @@ trajopt_variables()
 find_library(CONVEX_DECOMPOSITION_LIBRARY ConvexDecomposition HINTS ${CMAKE_INSTALL_PREFIX}/lib)
 find_library(HACD_LIBRARY HACD HINTS ${CMAKE_INSTALL_PREFIX}/lib)
 
+add_library(convex_decomposition src/convex_decomposition.cpp)
+target_link_libraries(convex_decomposition PUBLIC
+  trajopt::trajopt_utils
+  Eigen3::Eigen
+  tesseract::tesseract_geometry
+  tesseract::tesseract_collision_core)
+target_link_libraries(convex_decomposition PRIVATE
+  trajopt::vhacd
+  console_bridge::console_bridge)
+target_compile_options(convex_decomposition PRIVATE ${TRAJOPT_COMPILE_OPTIONS_PRIVATE})
+target_compile_options(convex_decomposition PUBLIC ${TRAJOPT_COMPILE_OPTIONS_PUBLIC})
+target_compile_definitions(convex_decomposition PUBLIC ${TRAJOPT_COMPILE_DEFINITIONS})
+target_cxx_version(convex_decomposition PUBLIC VERSION ${TRAJOPT_CXX_VERSION})
+#target_clang_tidy(convex_decomposition ARGUMENTS ${TRAJOPT_CLANG_TIDY_ARGS} ENABLE ${TRAJOPT_ENABLE_CLANG_TIDY})
+target_include_directories(convex_decomposition PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:include>")
+
 add_executable(convex_decomposition_hacd_node src/convex_decomposition_hacd.cpp)
 target_link_libraries(convex_decomposition_hacd_node
   trajopt::trajopt_utils
@@ -60,13 +80,17 @@ target_link_libraries(convex_decomposition_vhacd_node
   trajopt::vhacd
   console_bridge::console_bridge
   Eigen3::Eigen
-  ${BULLET_LIBRARIES})
+  convex_decomposition)
 target_compile_options(convex_decomposition_vhacd_node PRIVATE ${TRAJOPT_COMPILE_OPTIONS_PRIVATE} ${TRAJOPT_COMPILE_OPTIONS_PUBLIC})
 target_compile_definitions(convex_decomposition_vhacd_node PUBLIC ${TRAJOPT_COMPILE_DEFINITIONS})
 target_cxx_version(convex_decomposition_vhacd_node PUBLIC VERSION ${TRAJOPT_CXX_VERSION})
 target_clang_tidy(convex_decomposition_vhacd_node ARGUMENTS ${TRAJOPT_CLANG_TIDY_ARGS} ENABLE ${TRAJOPT_ENABLE_CLANG_TIDY})
-target_include_directories(convex_decomposition_vhacd_node SYSTEM PRIVATE
-    "${BULLET_ROOT_DIR}/${BULLET_INCLUDE_DIRS}")
 
-configure_package(NAMESPACE trajopt TARGETS convex_decomposition_hacd_node convex_decomposition_vhacd_node)
+configure_package(NAMESPACE trajopt TARGETS convex_decomposition convex_decomposition_hacd_node convex_decomposition_vhacd_node)
 
+# Mark cpp header files for installation
+install(DIRECTORY include/${PROJECT_NAME}
+  DESTINATION include
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+  PATTERN ".svn" EXCLUDE
+ )

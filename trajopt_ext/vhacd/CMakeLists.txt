@@ -48,8 +48,8 @@ if (OpenCL_FOUND)
     target_compile_definitions(${PROJECT_NAME} PRIVATE -DOPENCL_CL_FILES="${PROJECT_CL_FILES}" )
 endif()
 
-
-target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX trajopt::trajopt_utils Eigen3::Eigen)
+target_compile_definitions(${PROJECT_NAME} PUBLIC ${BULLET_DEFINITIONS})
+target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX trajopt::trajopt_utils Eigen3::Eigen ${BULLET_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<INSTALL_INTERFACE:include>")

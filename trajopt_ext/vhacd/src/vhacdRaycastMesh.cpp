@@ -1,4 +1,4 @@
-#include "vhacd/inc/vhacdRaycastMesh.h"
+#include <vhacd/inc/vhacdRaycastMesh.h>
 #include <math.h>
 #include <assert.h>
 

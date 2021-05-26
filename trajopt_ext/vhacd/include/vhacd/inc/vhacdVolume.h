@@ -251,15 +251,15 @@ public:
   unsigned char& GetVoxel(const size_t i, const size_t j, const size_t k)
   {
     assert(i < m_dim[0]);
-    assert(j < m_dim[0]);
-    assert(k < m_dim[0]);
+    assert(j < m_dim[1]);
+    assert(k < m_dim[2]);
     return m_data[i + j * m_dim[0] + k * m_dim[0] * m_dim[1]];
   }
   const unsigned char& GetVoxel(const size_t i, const size_t j, const size_t k) const
   {
     assert(i < m_dim[0]);
-    assert(j < m_dim[0]);
-    assert(k < m_dim[0]);
+    assert(j < m_dim[1]);
+    assert(k < m_dim[2]);
     return m_data[i + j * m_dim[0] + k * m_dim[0] * m_dim[1]];
   }
   size_t GetNPrimitivesOnSurf() const { return m_numVoxelsOnSurface; }
@@ -376,14 +376,14 @@ void Volume::Voxelize(const T* const points,
 
   double d[3] = { m_maxBB[0] - m_minBB[0], m_maxBB[1] - m_minBB[1], m_maxBB[2] - m_minBB[2] };
   double r;
-  if (d[0] > d[1] && d[0] > d[2])
+  if (d[0] >= d[1] && d[0] >= d[2])
   {
     r = d[0];
     m_dim[0] = dim;
     m_dim[1] = 2 + static_cast<size_t>(dim * d[1] / d[0]);
     m_dim[2] = 2 + static_cast<size_t>(dim * d[2] / d[0]);
   }
-  else if (d[1] > d[0] && d[1] > d[2])
+  else if (d[1] >= d[0] && d[1] >= d[2])
   {
     r = d[1];
     m_dim[1] = dim;

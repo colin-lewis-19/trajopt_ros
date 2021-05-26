@@ -30,8 +30,8 @@
 #include <trajopt_utils/macros.h>
 TRAJOPT_IGNORE_WARNINGS_PUSH
 
-#include "vhacd/inc/vhacdVolume.h"
-#include "vhacd/inc/btConvexHullComputer.h"
+#include <vhacd/inc/vhacdVolume.h>
+#include <bullet/LinearMath/btConvexHullComputer.h>
 #include <algorithm>
 #include <float.h>
 #include <math.h>

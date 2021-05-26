@@ -20,6 +20,8 @@
   <depend>vhacd</depend>
   <depend>trajopt_utils</depend>
   <depend>boost</depend>
+  <depend>tesseract_geometry</depend>
+  <depend>tesseract_collision</depend>
 
   <export>
     <build_type>cmake</build_type>
