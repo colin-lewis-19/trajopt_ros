@@ -192,6 +192,10 @@ public:
     // run V-HACD
     IVHACD* interfaceVHACD = CreateVHACD();
 
+    /** @todo Figure out how this works */
+    //interfaceVHACD->OCLInit(params_.m_oclDeviceID, params_.m_paramsVHACD.m_logger);
+    params_.m_paramsVHACD.m_oclAcceleration = false;
+
     bool res = interfaceVHACD->Compute(&points[0],
                                        static_cast<unsigned int>(points.size() / 3),
                                        (const uint32_t*)(&triangles[0]),
@@ -313,7 +317,6 @@ protected:
         if (++i < argc)
           params.m_fileNameIn = argv[i];
       }
-
       else if (!strcmp(argv[i], "--output"))
       {
         if (++i < argc)

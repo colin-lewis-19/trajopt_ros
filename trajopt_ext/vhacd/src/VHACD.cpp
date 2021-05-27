@@ -343,6 +343,14 @@ bool VHACD::OCLInit(void* const oclDevice, IUserLogger* const logger)
     }
     return false;
   }
+  else if (m_oclWorkGroupSize == 0 && workGroupSize == 0)
+  {
+    if (logger)
+    {
+      logger->Log("Working group size is zero\n");
+    }
+    return false;
+  }
 
   if (workGroupSize < m_oclWorkGroupSize)
   {
@@ -823,7 +831,11 @@ void VHACD::ComputeBestClippingPlane(const PrimitiveSet* inputPSet,
   size_t globalSize = 0;
   size_t nWorkGroups = 0;
   double unitVolume = 0.0;
-  if (oclAcceleration)
+
+  if (m_oclWorkGroupSize == 0)
+    params.m_logger->Log("The OpenCL working group size is zero, disabling OCL Acceleration. Did you call OCLInit?\n");
+
+  if (oclAcceleration && m_oclWorkGroupSize > 0)
   {
     VoxelSet* vset = (VoxelSet*)inputPSet;
     const Vec3<double> minBB = vset->GetMinBB();
