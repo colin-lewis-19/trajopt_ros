@@ -799,7 +799,7 @@ void VHACD::ComputeBestClippingPlane(const PrimitiveSet* inputPSet,
   char msg[256];
   size_t nPrimitives = inputPSet->GetNPrimitives();
   bool oclAcceleration =
-      (nPrimitives > OCL_MIN_NUM_PRIMITIVES && params.m_oclAcceleration && params.m_mode == 0) ? true : false;
+      (nPrimitives > OCL_MIN_NUM_PRIMITIVES && params.m_oclAcceleration && params.m_mode == 0 && m_oclWorkGroupSize > 0) ? true : false;
   int32_t iBest = -1;
   int32_t nPlanes = static_cast<int32_t>(planes.Size());
   bool cancel = false;
@@ -832,10 +832,13 @@ void VHACD::ComputeBestClippingPlane(const PrimitiveSet* inputPSet,
   size_t nWorkGroups = 0;
   double unitVolume = 0.0;
 
-  if (m_oclWorkGroupSize == 0)
-    params.m_logger->Log("The OpenCL working group size is zero, disabling OCL Acceleration. Did you call OCLInit?\n");
+  if (params.m_oclAcceleration && m_oclWorkGroupSize == 0)
+  {
+    if (params.m_logger)
+      params.m_logger->Log("The OpenCL working group size is zero, disabling OCL Acceleration. Did you call OCLInit?\n");
+  }
 
-  if (oclAcceleration && m_oclWorkGroupSize > 0)
+  if (oclAcceleration)
   {
     VoxelSet* vset = (VoxelSet*)inputPSet;
     const Vec3<double> minBB = vset->GetMinBB();
